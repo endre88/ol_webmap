@@ -15,6 +15,7 @@ function init() {
       }),
     ],
     target: "js-map",
+    keyboardEventTarget: document,
   });
   const popupContainerElement = document.getElementById("popup-coordinates");
   const popup = new ol.Overlay({
@@ -29,5 +30,21 @@ function init() {
     popup.setPosition(undefined);
     popup.setPosition(clickedCoordinate);
     popupContainerElement.innerHTML = clickedCoordinate;
+  });
+  //DragRotate interaction
+  const dragRotateInteraction = new ol.interaction.DragRotate({
+    condition: ol.events.condition.altKeyOnly,
+  });
+  map.addInteraction(dragRotateInteraction);
+  const drawInteraction = new ol.interaction.Draw({
+    type: "Polygon",
+    freehand: false,
+  });
+  map.addInteraction(drawInteraction);
+
+  drawInteraction.on("drawend", function (e) {
+    let parser = new ol.format.GeoJSON();
+    let drawnFeatures = parser.writeFeatures([e.feature]);
+    console.log(drawnFeatures);
   });
 }
