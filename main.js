@@ -4,15 +4,20 @@ function init() {
   const fullScreenControl = new ol.control.FullScreen();
   const mousePositionControl = new ol.control.MousePosition();
   const overViewMapControl = new ol.control.OverviewMap({
+    collapsed: false,
     layers: [new ol.layer.Tile({ source: new ol.source.OSM() })],
   });
+  const scaleLineControl = new ol.control.ScaleLine();
+  const zoomSliderControl = new ol.control.ZoomSlider();
+  const zoomToExtentControl = new ol.control.ZoomToExtent();
+
   const map = new ol.Map({
     view: new ol.View({
       center: [-12080385, 7567433],
       zoom: 3,
       maxZoom: 12,
       minZoom: 2,
-      rotation: 0.5,
+      rotation: 0,
     }),
     layers: [
       new ol.layer.Tile({
@@ -23,7 +28,14 @@ function init() {
     keyboardEventTarget: document,
     controls: ol.control.defaults //ez megváltozott valamilyen körkörös hivatkozási probléma miatt
       .defaults()
-      .extend([fullScreenControl, mousePositionControl, overViewMapControl]),
+      .extend([
+        fullScreenControl,
+        mousePositionControl,
+        overViewMapControl,
+        scaleLineControl,
+        zoomSliderControl,
+        zoomToExtentControl,
+      ]),
   });
   //map.addControl(fullScreenControl);
   //map.addControl(mousePositionControl);
