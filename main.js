@@ -1,6 +1,11 @@
 window.onload = init;
 
 function init() {
+  const fullScreenControl = new ol.control.FullScreen();
+  const mousePositionControl = new ol.control.MousePosition();
+  const overViewMapControl = new ol.control.OverviewMap({
+    layers: [new ol.layer.Tile({ source: new ol.source.OSM() })],
+  });
   const map = new ol.Map({
     view: new ol.View({
       center: [-12080385, 7567433],
@@ -16,7 +21,13 @@ function init() {
     ],
     target: "js-map",
     keyboardEventTarget: document,
+    controls: ol.control.defaults //ez megváltozott valamilyen körkörös hivatkozási probléma miatt
+      .defaults()
+      .extend([fullScreenControl, mousePositionControl, overViewMapControl]),
   });
+  //map.addControl(fullScreenControl);
+  //map.addControl(mousePositionControl);
+  // map.addControl(overViewMapControl);
   const popupContainerElement = document.getElementById("popup-coordinates");
   const popup = new ol.Overlay({
     element: popupContainerElement,
