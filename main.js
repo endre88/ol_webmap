@@ -10,11 +10,23 @@ function init() {
   const scaleLineControl = new ol.control.ScaleLine();
   const zoomSliderControl = new ol.control.ZoomSlider();
   const zoomToExtentControl = new ol.control.ZoomToExtent();*/
-
+  var extent = ol.proj.transformExtent(
+    [21.450936, 47.383822, 21.850891, 47.63821],
+    "EPSG:4326",
+    "EPSG:3857"
+  );
+  var center = ol.proj.transform(
+    [21.650914, 47.511016],
+    "EPSG:4326",
+    "EPSG:3857"
+  );
   const map = new ol.Map({
     view: new ol.View({
-      center: [-12080385, 7567433],
+      //center: [-12080385, 7567433],
       zoom: 3,
+      projection: "EPSG:3857",
+      center: center,
+
       /*maxZoom: 12,
       minZoom: 2,
       rotation: 0,*/
@@ -52,7 +64,7 @@ function init() {
           key: "Atuo1D-VVY8EkXkW_I6RZoyPnwPLUoIpK-Jau8Njf5tVvN4oQ93o1pFRK5QdjxIW",
           imagerySet: "Aerialwithlabels",
         }),
-        visible: true,
+        visible: false,
       }),
     ],
   });
@@ -62,7 +74,7 @@ function init() {
     source: new ol.source.XYZ({
       url: "https://{1-4}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
     }),
-    visible: false,
+    visible: true,
   });
 
   map.addLayer(cartoDbBaseLayer);
@@ -73,13 +85,27 @@ function init() {
   });
   map.addLayer(tiledebugLayer);
 
-  const stamenLayer = new ol.layer.Tile({
+  const envimap = new ol.layer.Tile({
     source: new ol.source.XYZ({
-      url: "http://tile.stamen.com/terrain/{z}/{x}/{y}.jpg",
+      url: "https://tileserver8.envimap.hu/2023_Debrecen_20/{z}/{x}/{y}",
     }),
     visible: false,
+    extent: extent,
   });
-  map.addLayer(stamenLayer);
+  map.addLayer(envimap);
+
+  const ujbudalayer = new ol.layer.Tile({
+    source: new ol.source.TileWMS({
+      url: "https://terinfo.ujbuda.hu/mapproxy/service?",
+      params: {
+        LAYERS: "osm-eov",
+        FORMAT: "image/png",
+        TRANSPARENT: true,
+      }, //archiv_1963_0076_2827, orto_2023, osm-eov, OSM_BPXI_20161024 ez a rész a fontos a WMS rétegek hozzáadásakor, itt van egy korábbi állapot EOV-ban is az OSM-ről.
+    }),
+  });
+
+  map.addLayer(ujbudalayer);
 
   map.on("click", function (e) {
     console.log(e.coordinate);
