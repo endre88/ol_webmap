@@ -7,6 +7,10 @@ body {
   padding: 0;
 }
 .map {
-  width: 100vw;
   height: 100vh;
+}
+.grid-container {
+  display: grid;
+  grid-template-columns: 20vw 80vw;
+  grid-template-rows: 100vh;
 }

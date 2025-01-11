@@ -10,12 +10,12 @@ function init() {
   const scaleLineControl = new ol.control.ScaleLine();
   const zoomSliderControl = new ol.control.ZoomSlider();
   const zoomToExtentControl = new ol.control.ZoomToExtent();*/
-  var extent = ol.proj.transformExtent(
+  let extent = ol.proj.transformExtent(
     [21.450936, 47.383822, 21.850891, 47.63821],
     "EPSG:4326",
     "EPSG:3857"
   );
-  var center = ol.proj.transform(
+  let center = ol.proj.transform(
     [21.650914, 47.511016],
     "EPSG:4326",
     "EPSG:3857"
@@ -26,19 +26,10 @@ function init() {
       zoom: 3,
       projection: "EPSG:3857",
       center: center,
-
       /*maxZoom: 12,
       minZoom: 2,
       rotation: 0,*/
     }),
-    layers: [
-      new ol.layer.Tile({
-        source: new ol.source.OSM(),
-        zIndex: 1,
-        visible: false,
-        //extent: [],
-      }),
-    ],
     target: "js-map",
     /*keyboardEventTarget: document,
     controls: ol.control.defaults //ez megváltozott valamilyen körkörös hivatkozási probléma miatt dupla defaults kell
@@ -48,64 +39,143 @@ function init() {
         zoomSliderControl,
         zoomToExtentControl,*/
   });
-  const layerGroup = new ol.layer.Group({
-    layers: [
-      new ol.layer.Tile({
-        source: new ol.source.OSM({
-          url: "https://{a-c}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png",
-        }),
-        zIndex: 0,
-        visible: false,
-        opacity: 0.5,
-      }),
-      //Bing Maps
-      new ol.layer.Tile({
-        source: new ol.source.BingMaps({
-          key: "Atuo1D-VVY8EkXkW_I6RZoyPnwPLUoIpK-Jau8Njf5tVvN4oQ93o1pFRK5QdjxIW",
-          imagerySet: "Aerialwithlabels",
-        }),
-        visible: false,
-      }),
-    ],
-  });
-  map.addLayer(layerGroup);
 
+  //Base Layers
+  // 1. OSM Standard
+  const openstreetmapStandard = new ol.layer.Tile({
+    source: new ol.source.OSM(),
+    visible: true,
+    title: "OSMStandard",
+  });
+
+  // 2. OSM Humanitarian
+  const openstreemaphumanitarian = new ol.layer.Tile({
+    source: new ol.source.OSM({
+      url: "https://{a-c}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png",
+    }),
+    visible: false,
+    title: "OSMHumanitarian",
+  });
+
+  // 3. Bing Maps
+  const BingMaps = new ol.layer.Tile({
+    source: new ol.source.BingMaps({
+      key: "Atuo1D-VVY8EkXkW_I6RZoyPnwPLUoIpK-Jau8Njf5tVvN4oQ93o1pFRK5QdjxIW",
+      imagerySet: "Aerialwithlabels",
+    }),
+    visible: false,
+    title: "BingMaps",
+  });
+
+  // 4. Cartodb Base Layer
   const cartoDbBaseLayer = new ol.layer.Tile({
     source: new ol.source.XYZ({
       url: "https://{1-4}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
     }),
-    visible: true,
-  });
-
-  map.addLayer(cartoDbBaseLayer);
-
-  const tiledebugLayer = new ol.layer.Tile({
-    source: new ol.source.TileDebug(),
     visible: false,
+    title: "CartoDbBaseLayer",
   });
-  map.addLayer(tiledebugLayer);
 
-  const envimap = new ol.layer.Tile({
-    source: new ol.source.XYZ({
-      url: "https://tileserver8.envimap.hu/2023_Debrecen_20/{z}/{x}/{y}",
-    }),
-    visible: false,
-    extent: extent,
+  const baseLayerGroup = new ol.layer.Group({
+    layers: [
+      openstreetmapStandard,
+      openstreemaphumanitarian,
+      BingMaps,
+      cartoDbBaseLayer,
+    ],
   });
-  map.addLayer(envimap);
+  map.addLayer(baseLayerGroup);
+  //Layer Switcher Logic for Base Layers
+  const baseLayerElements = document.querySelectorAll(
+    ".sidebar > input[type=radio]"
+  );
+  //console.log(baseLayerElements);
+  for (let baseLayerElement of baseLayerElements) {
+    baseLayerElement.addEventListener("change", function () {
+      let baseLayerElementValue = this.value;
+      baseLayerGroup.getLayers().forEach(function (element, index, array) {
+        let baseLayerTitle = element.get("title");
+        element.setVisible(baseLayerTitle === baseLayerElementValue);
+      });
+    });
+  }
+
+  //Layers
+  // 1. ÚjbudaLayer
 
   const ujbudalayer = new ol.layer.Tile({
+    source: new ol.source.TileWMS({
+      url: "https://terinfo.ujbuda.hu/mapproxy/service?",
+      params: {
+        LAYERS: "orto_2023",
+        FORMAT: "image/png",
+        TRANSPARENT: true,
+      },
+      attributions: "Újbuda",
+    }),
+    title: "UjbudaLayer",
+    visible: false,
+    //archiv_1963_0076_2827, orto_2023, osm-eov, OSM_BPXI_20161024 ez a rész a fontos a WMS rétegek hozzáadásakor, itt van egy korábbi állapot EOV-ban is az OSM-ről.
+  });
+
+  // 2. ÚjbudaLayer
+
+  const budalayer = new ol.layer.Tile({
     source: new ol.source.TileWMS({
       url: "https://terinfo.ujbuda.hu/mapproxy/service?",
       params: {
         LAYERS: "osm-eov",
         FORMAT: "image/png",
         TRANSPARENT: true,
-      }, //archiv_1963_0076_2827, orto_2023, osm-eov, OSM_BPXI_20161024 ez a rész a fontos a WMS rétegek hozzáadásakor, itt van egy korábbi állapot EOV-ban is az OSM-ről.
+      },
+      attributions: "osm",
+      //archiv_1963_0076_2827, orto_2023, osm-eov, OSM_BPXI_20161024 ez a rész a fontos a WMS rétegek hozzáadásakor, itt van egy korábbi állapot EOV-ban is az OSM-ről.
     }),
+    title: "budaLayer",
+    visible: false,
   });
 
-  map.addLayer(ujbudalayer);
+  // 3. TileDebub Layer
+  const tiledebugLayer = new ol.layer.Tile({
+    source: new ol.source.TileDebug(),
+    visible: false,
+    title: "TileDebug",
+  });
+
+  const rasteTileLayerGroup = new ol.layer.Group({
+    layers: [ujbudalayer, budalayer, tiledebugLayer],
+  });
+
+  map.addLayer(rasteTileLayerGroup);
+
+  //Layer Switcher Logic for Layers
+  const tileRasterLayerElements = document.querySelectorAll(
+    ".sidebar > input[type=checkbox]"
+  );
+  //console.log(tileRasterLayerElements);
+  for (let tileRasterLayerElement of tileRasterLayerElements) {
+    tileRasterLayerElement.addEventListener("change", function () {
+      let tileRasterLayerElementValue = this.value;
+      let tileRasterLayer;
+      rasteTileLayerGroup.getLayers().forEach(function (element, index, array) {
+        if (tileRasterLayerElementValue === element.get("title")) {
+          tileRasterLayer = element;
+        }
+      });
+      this.checked
+        ? tileRasterLayer.setVisible(true)
+        : tileRasterLayer.setVisible(false);
+    });
+  }
+
+  /*const envimap = new ol.layer.Tile({
+    source: new ol.source.XYZ({
+      url: "https://tileserver8.envimap.hu/2023_Debrecen_20/{z}/{x}/{y}",
+    }),
+    visible: false,
+    extent: extent,
+  });
+  map.addLayer(envimap);*/
 
   map.on("click", function (e) {
     console.log(e.coordinate);
