@@ -44,7 +44,7 @@ function init() {
   // 1. OSM Standard
   const openstreetmapStandard = new ol.layer.Tile({
     source: new ol.source.OSM(),
-    visible: true,
+    visible: false,
     title: "OSMStandard",
   });
 
@@ -76,14 +76,35 @@ function init() {
     title: "CartoDbBaseLayer",
   });
 
+  //Base vector layers
+  //Vector tile layers openstreetmap
+
+  const openstreetmapVectorTile = new ol.layer.VectorTile({
+    source: new ol.source.VectorTile({
+      url: "https://api.maptiler.com/tiles/v3-openmaptiles/{z}/{x}/{y}.pbf?key=AWQe57TePncXgDmGmTJ5",
+      format: new ol.format.MVT(),
+      attributions:
+        '<a href="https://www.maptiler.com/copyright/" target="_blank">© MapTiler</a>',
+    }),
+    visible: true,
+    title: "OpenStreetMapVectorTile",
+  });
+
+  const opensteetmapvectorstyle =
+    "https://api.maptiler.com/maps/c1aec2a4-2f40-48ac-a369-f3bab3e8d444/style.json?key=AWQe57TePncXgDmGmTJ5";
+  //olms.apply(map, opensteetmapvectorstyle);
+
+  //Base Layer Group
   const baseLayerGroup = new ol.layer.Group({
     layers: [
       openstreetmapStandard,
       openstreemaphumanitarian,
       BingMaps,
       cartoDbBaseLayer,
+      openstreetmapVectorTile,
     ],
   });
+
   map.addLayer(baseLayerGroup);
   //Layer Switcher Logic for Base Layers
   const baseLayerElements = document.querySelectorAll(
