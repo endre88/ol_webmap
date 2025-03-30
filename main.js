@@ -44,7 +44,7 @@ function init() {
   // 1. OSM Standard
   const openstreetmapStandard = new ol.layer.Tile({
     source: new ol.source.OSM(),
-    visible: false,
+    visible: true,
     title: "OSMStandard",
   });
 
@@ -86,7 +86,7 @@ function init() {
       attributions:
         '<a href="https://www.maptiler.com/copyright/" target="_blank">© MapTiler</a>',
     }),
-    visible: true,
+    visible: false,
     title: "OpenStreetMapVectorTile",
   });
 
@@ -163,8 +163,30 @@ function init() {
     title: "TileDebug",
   });
 
+  //Vector Layers
+  //Central EU Countries geojson vector layer
+  /*const EUCountriesGeoJSON = new ol.layer.Vector({
+    source: new ol.source.Vector({
+      url: "./data/vector_data/Central_EU_Countries.geojson",
+      format: new ol.format.GeoJSON(),
+    }),
+    visible: true,
+  });*/
+
+  const EUCountriesGeoJSONVI = new ol.layer.VectorImage({
+    source: new ol.source.Vector({
+      url: "./data/vector_data/Central_EU_Countries.geojson",
+      format: new ol.format.GeoJSON(),
+    }),
+    visible: false,
+    title: "EUCountriesGeoJSONVI",
+  });
+
+  map.addLayer(EUCountriesGeoJSONVI);
+
+  //Raster Tile Layer Group
   const rasteTileLayerGroup = new ol.layer.Group({
-    layers: [ujbudalayer, budalayer, tiledebugLayer],
+    layers: [ujbudalayer, budalayer, tiledebugLayer, EUCountriesGeoJSONVI],
   });
 
   map.addLayer(rasteTileLayerGroup);
