@@ -161,7 +161,7 @@ function init() {
     source: new ol.source.TileWMS({
       url: "http://172.16.4.170:8080/geoserver/Rakosrendezo/wms",
       params: {
-        LAYERS: "Rakosrendezo",
+        LAYERS: "65-231_o_2015",
         FORMAT: "image/png",
         TRANSPARENT: true,
       },
