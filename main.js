@@ -159,7 +159,7 @@ function init() {
 
   const Rakosrendezo = new ol.layer.Tile({
     source: new ol.source.TileWMS({
-      url: "ttp://172.16.4.170:8080/geoserver/Rakosrendezo/wms",
+      url: "http://172.16.4.170:8080/geoserver/Rakosrendezo/wms",
       params: {
         LAYERS: "Rakosrendezo",
         FORMAT: "image/png",
