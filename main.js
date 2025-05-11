@@ -161,6 +161,22 @@ function init() {
     visible: false,
   });
 
+
+  const Rakosrendezo = new ol.layer.Tile({
+    source: new ol.source.TileWMS({
+      url: "http://172.16.4.170:8080/geoserver/Rakosrendezo/wms?",
+      params: {
+        LAYERS: ["65-231_o_2015", "65-232_o_2015", "65-233_o_2015", "65-234_o_2015"],
+        FORMAT: "image/png",
+        TRANSPARENT: true,
+      },
+      attributions: "Rakosrendezo",
+    }),
+    title: "Rakosrendezo",
+    visible: true,
+    //archiv_1963_0076_2827, orto_2023, osm-eov, OSM_BPXI_20161024 ez a rész a fontos a WMS rétegek hozzáadásakor, itt van egy korábbi állapot EOV-ban is az OSM-ről.
+  });
+
   // 3. TileDebub Layer
   const tiledebugLayer = new ol.layer.Tile({
     source: new ol.source.TileDebug(),
