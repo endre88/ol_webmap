@@ -1,6 +1,11 @@
 window.onload = init;
 
 function init() {
+  proj4.defs(
+    "EPSG:23700",
+    "+proj=somerc +lat_0=47.14439372222222 +lon_0=19.04857177777778 +k_0=0.99993 +x_0=650000 +y_0=200000 +ellps=GRS67 +units=m +no_defs"
+  );
+  ol.proj.proj4.register(proj4);
   /*const fullScreenControl = new ol.control.FullScreen();
   const mousePositionControl = new ol.control.MousePosition();
   const overViewMapControl = new ol.control.OverviewMap({
@@ -16,14 +21,14 @@ function init() {
     "EPSG:3857"
   );
   let center = ol.proj.transform(
-    [21.650914, 47.511016],
+    [19.050914, 47.511016],
     "EPSG:4326",
     "EPSG:3857"
   );
   const map = new ol.Map({
     view: new ol.View({
       //center: [-12080385, 7567433],
-      zoom: 3,
+      zoom: 12,
       projection: "EPSG:3857",
       center: center,
       /*maxZoom: 12,
@@ -182,11 +187,28 @@ function init() {
     title: "EUCountriesGeoJSONVI",
   });
 
-  map.addLayer(EUCountriesGeoJSONVI);
+  const VectorSource = new ol.source.Vector({
+    url: "https://raw.githubusercontent.com/endre88/gyak/refs/heads/master/E-kozmu_polygonok.geojson",
+    format: new ol.format.GeoJSON(),
+    projection: "EPSG:23700",
+  });
+
+  const ekozmu = new ol.layer.Vector({
+    source: VectorSource,
+    visible: true,
+    title: "Ekozmu",
+  });
+  //map.addLayer(EUCountriesGeoJSONVI);
 
   //Raster Tile Layer Group
   const rasteTileLayerGroup = new ol.layer.Group({
-    layers: [ujbudalayer, budalayer, tiledebugLayer, EUCountriesGeoJSONVI],
+    layers: [
+      ujbudalayer,
+      budalayer,
+      tiledebugLayer,
+      EUCountriesGeoJSONVI,
+      ekozmu,
+    ],
   });
 
   map.addLayer(rasteTileLayerGroup);
@@ -223,6 +245,57 @@ function init() {
   map.on("click", function (e) {
     console.log(e.coordinate);
   });
+
+  //BKM-be
+  let select = new ol.interaction.Select();
+  map.addInteraction(select);
+  let selectedFeatures = select.getFeatures();
+  // a DragBox interaction used to select features by drawing boxes
+  let dragBox = new ol.interaction.DragBox({
+    condition: ol.events.condition.shiftKeyOnly,
+    style: new ol.style.Style({
+      stroke: new ol.style.Stroke({
+        color: [0, 0, 255, 1],
+      }),
+    }),
+  });
+  map.addInteraction(dragBox);
+  let infoBox = document.getElementById("info");
+  dragBox.on("boxend", function (e) {
+    // features that intersect the box are added to the collection of
+    // selected features, and their names are displayed in the "info"
+    // div
+    let info = [];
+    let infok = "";
+    let extent = dragBox.getGeometry().getExtent();
+    VectorSource.forEachFeatureIntersectingExtent(extent, function (feature) {
+      selectedFeatures.push(feature);
+      /*info.push(
+        "Kérelem: ",
+        feature.get("ugyszam"),
+        "Tárgy: ",
+        feature.get("targy")
+      );*/
+      infok += "Kérelem: " + feature.get("ugyszam") + "<br>";
+      infok += " Tárgy: " + feature.get("targy") + " <br> <br>";
+    });
+    /*if (info.length > 0) {
+      infoBox.innerHTML = info.join(", ");
+    }*/
+    console.log(info);
+    console.log(infok);
+    infoBox.innerHTML = infok;
+  });
+
+  // clear selection when drawing a new box and when clicking on the map
+  dragBox.on("boxstart", function (e) {
+    selectedFeatures.clear();
+  });
+  map.on("click", function () {
+    selectedFeatures.clear();
+    infoBox.innerHTML = "";
+  });
+
   //map.addControl(fullScreenControl);
   //map.addControl(mousePositionControl);
   // map.addControl(overViewMapControl);

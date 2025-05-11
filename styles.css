@@ -11,6 +11,8 @@ body {
 }
 .grid-container {
   display: grid;
-  grid-template-columns: 20vw 80vw;
+  grid-template-columns: 30vw 70vw;
   grid-template-rows: 100vh;
 }
+.span4{
+margin-top: 10px;}
